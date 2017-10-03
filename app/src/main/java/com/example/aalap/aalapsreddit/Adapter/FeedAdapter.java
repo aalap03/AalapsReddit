@@ -55,7 +55,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                     .into(holder.imageView);
         else{
             Picasso.with(context)
-                    .load(R.mipmap.ic_launcher_round)
+                    .load(R.drawable.reddit_default)
                     .into(holder.imageView);
         }
 
