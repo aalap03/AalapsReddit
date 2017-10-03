@@ -42,7 +42,7 @@ public class CommentsActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.isSuccessful())
-                    try {
+                    try {//
                         Log.d(TAG, "onResponse: "+response.body().string());
                     } catch (IOException e) {
                         e.printStackTrace();
