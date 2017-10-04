@@ -66,4 +66,5 @@ public class FeedsActivity extends AppCompatActivity {
                 .subscribeOn(Schedulers.io())
                 .subscribe();
     }
+
 }

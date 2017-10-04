@@ -32,11 +32,11 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
     Activity activity;
 
     private static final String TAG = "FeedAdapter";
-    public static final String TITLE="title";
-    public static final String AUTHOR="auhtor";
-    public static final String UPDATED="updated";
-    public static final String IMAGE="image";
-    public static final String COMMENT_LINK="link";
+    public static final String TITLE = "title";
+    public static final String AUTHOR = "auhtor";
+    public static final String UPDATED = "updated";
+    public static final String IMAGE = "image";
+    public static final String COMMENT_LINK = "link";
 
     public FeedAdapter(List<Entry> entries, Activity activity) {
         this.entries = entries;
@@ -53,7 +53,10 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         Entry entry = entries.get(position);
         holder.updatedAt.setText(entry.getUpdated());
         holder.title.setText(entry.getTitle());
-        holder.authorName.setText(entry.getAuthor().getName().replace("/u/",""));
+        if (entry.getAuthor() != null)
+            holder.authorName.setText(entry.getAuthor().getName().replace("/u/", ""));
+        else
+            holder.authorName.setText("Aalap Patel");
 
         if (!entry.getImageLink().isEmpty())
             Picasso.with(activity)
@@ -61,13 +64,13 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                     .error(R.drawable.reddit_default)
                     .placeholder(R.mipmap.ic_launcher_round)
                     .into(holder.imageView);
-        else{
+        else {
             Picasso.with(activity)
                     .load(R.drawable.reddit_default)
                     .into(holder.imageView);
         }
 
-        holder.itemView.setOnClickListener(v->holder.bindClick(entry));
+        holder.itemView.setOnClickListener(v -> holder.bindClick(entry));
     }
 
     @Override
@@ -88,7 +91,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             imageView = itemView.findViewById(R.id.feed_image);
         }
 
-        public void bindClick(Entry entry){
+        public void bindClick(Entry entry) {
             Intent intent = new Intent(activity, CommentsActivity.class);
             android.support.v4.util.Pair<View, String> pair1 = android.support.v4.util.Pair.create(title, "title");
             android.support.v4.util.Pair<View, String> pair2 = android.support.v4.util.Pair.create(authorName, "author");
@@ -103,9 +106,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             ActivityOptionsCompat optionsCompat = ActivityOptionsCompat
                     .makeSceneTransitionAnimation(activity, pair1, pair2, pair3, pair4);
 
-            if(optionsCompat!=null){
+            if (optionsCompat != null) {
                 activity.startActivity(intent, optionsCompat.toBundle());
-            }else
+            } else
                 activity.startActivity(intent);
         }
     }

@@ -77,12 +77,12 @@ public class Feed {
     @Override
     public String toString() {
         return "Feed{" +
-                "updated='" + updated + '\'' +
-                ", icon='" + icon + '\'' +
-                ", id='" + id + '\'' +
-                ", title='" + title + '\'' +
-                ", subtitle='" + subtitle + '\'' +
-                ", entry=" + entry +
+                "updated='" + updated + '\n' +
+                ", icon='" + icon + '\n' +
+                ", id='" + id + '\n' +
+                ", title='" + title + '\n' +
+                ", subtitle='" + subtitle + '\n' +
+                ", entry=" + entry + "--------------------------" + "\n"+
                 '}';
     }
 }

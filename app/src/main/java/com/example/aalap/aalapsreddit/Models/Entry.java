@@ -89,11 +89,11 @@ public class Entry {
     @Override
     public String toString() {
         return "Entry{" +
-                "title='" + title + '\'' +
-                ", updated='" + updated + '\'' +
+                "title='" + title + '\n' +
+                ", updated='" + updated + '\n' +
                 ", author=" + author + "\n"+
-                ", content='" + content + "\n"+'\'' +
-                ", link='" + link + '\'' +
+                ", content='" + content + "\n" +
+                ", link='" + link + '\n' + "------------------------------------------------------------"+
                 '}';
     }
 }
