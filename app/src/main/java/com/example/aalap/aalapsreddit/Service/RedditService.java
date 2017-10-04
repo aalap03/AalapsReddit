@@ -18,7 +18,7 @@ public interface RedditService {
     @GET("r/{path}/.rss")
     Observable<Response<Feed>> getFeedsO(@Path("path") String text);
 
-    @GET("{path}/.rss")
-    Call<ResponseBody> getFeedComments(@Path("path") String text);
+    @GET("{path}.rss")
+    Observable<Response<Feed>> getCommentFeeds(@Path("path") String text);
 
 }

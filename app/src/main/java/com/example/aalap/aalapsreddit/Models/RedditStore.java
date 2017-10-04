@@ -3,6 +3,8 @@ package com.example.aalap.aalapsreddit.Models;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.aalap.aalapsreddit.Utils.ExtractData;
+
 import java.util.List;
 
 import retrofit2.Response;
@@ -21,24 +23,13 @@ public class RedditStore {
     }
 
     public List<Entry> getEntryList(Response<Feed> response){
-
         List<Entry> entry = response.body().getEntry();
-
         for (Entry entry1 : entry) {
-            Log.d(TAG, "content: " + entry1.getContent());
-            String[] split = entry1.getContent().split("<img src=\"");
-            if (split != null) {
-                if (split.length > 1) {
-                    String[] split1 = split[1].split("\"");
-                    entry1.setImageLink(split1[0]);
-                } else
-                    entry1.setImageLink("");
-            } else {
-                entry1.setImageLink("");
-            }
+            ExtractData extractCommentLink = new ExtractData(entry1.getContent(), "<a href=");
+            ExtractData extractJpg = new ExtractData(entry1.getContent(), "<img src=");
+            entry1.setImageLink(extractJpg.extract());
+            entry1.setCommentLink(extractCommentLink.extract());
         }
-
         return entry;
     }
-
 }

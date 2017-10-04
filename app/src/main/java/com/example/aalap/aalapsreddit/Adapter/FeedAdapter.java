@@ -1,9 +1,12 @@
 package com.example.aalap.aalapsreddit.Adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,18 +29,23 @@ import static com.example.aalap.aalapsreddit.Activities.FeedsActivity.BASE_URL;
 public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder> {
 
     List<Entry> entries;
-    Context context;
+    Activity activity;
 
     private static final String TAG = "FeedAdapter";
+    public static final String TITLE="title";
+    public static final String AUTHOR="auhtor";
+    public static final String UPDATED="updated";
+    public static final String IMAGE="image";
+    public static final String COMMENT_LINK="link";
 
-    public FeedAdapter(List<Entry> entries, Context context) {
+    public FeedAdapter(List<Entry> entries, Activity activity) {
         this.entries = entries;
-        this.context = context;
+        this.activity = activity;
     }
 
     @Override
     public FeedViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new FeedViewHolder(LayoutInflater.from(context).inflate(R.layout.card_items, parent, false));
+        return new FeedViewHolder(LayoutInflater.from(activity).inflate(R.layout.card_items, parent, false));
     }
 
     @Override
@@ -45,16 +53,16 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         Entry entry = entries.get(position);
         holder.updatedAt.setText(entry.getUpdated());
         holder.title.setText(entry.getTitle());
-        holder.authorName.setText(entry.getAuthor().getName());
+        holder.authorName.setText(entry.getAuthor().getName().replace("/u/",""));
 
         if (!entry.getImageLink().isEmpty())
-            Picasso.with(context)
+            Picasso.with(activity)
                     .load(entry.getImageLink())
-                    .error(R.mipmap.ic_launcher)
+                    .error(R.drawable.reddit_default)
                     .placeholder(R.mipmap.ic_launcher_round)
                     .into(holder.imageView);
         else{
-            Picasso.with(context)
+            Picasso.with(activity)
                     .load(R.drawable.reddit_default)
                     .into(holder.imageView);
         }
@@ -81,11 +89,24 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         }
 
         public void bindClick(Entry entry){
-            Intent intent = new Intent(context, CommentsActivity.class);
-            intent.putExtra("link", entry.getAuthor().getUri().replace(BASE_URL, ""));
-            intent.putExtra("title", entry.getTitle());
-            intent.putExtra("image", entry.getImageLink());
-            context.startActivity(intent);
+            Intent intent = new Intent(activity, CommentsActivity.class);
+            android.support.v4.util.Pair<View, String> pair1 = android.support.v4.util.Pair.create(title, "title");
+            android.support.v4.util.Pair<View, String> pair2 = android.support.v4.util.Pair.create(authorName, "author");
+            android.support.v4.util.Pair<View, String> pair3 = android.support.v4.util.Pair.create(updatedAt, "updated");
+            android.support.v4.util.Pair<View, String> pair4 = android.support.v4.util.Pair.create(imageView, "image");
+            intent.putExtra(TITLE, entry.getTitle());
+            intent.putExtra(AUTHOR, entry.getAuthor().getName());
+            intent.putExtra(IMAGE, entry.getImageLink());
+            intent.putExtra(UPDATED, entry.getUpdated());
+            intent.putExtra(COMMENT_LINK, entry.getCommentLink());
+
+            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat
+                    .makeSceneTransitionAnimation(activity, pair1, pair2, pair3, pair4);
+
+            if(optionsCompat!=null){
+                activity.startActivity(intent, optionsCompat.toBundle());
+            }else
+                activity.startActivity(intent);
         }
     }
 }

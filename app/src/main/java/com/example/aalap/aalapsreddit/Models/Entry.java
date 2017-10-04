@@ -28,6 +28,15 @@ public class Entry {
     String link;
 
     String imageLink;
+    String commentLink;
+
+    public String getCommentLink() {
+        return commentLink;
+    }
+
+    public void setCommentLink(String commentLink) {
+        this.commentLink = commentLink;
+    }
 
     public String getImageLink() {
         return imageLink;

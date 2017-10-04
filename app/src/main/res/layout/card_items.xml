@@ -17,6 +17,7 @@
         <ImageView
             android:id="@+id/feed_image"
             android:layout_width="100dp"
+            android:transitionName="image"
             android:layout_height="100dp"
             android:src="@drawable/reddit_default"
             />
@@ -31,6 +32,7 @@
             <TextView
                 android:id="@+id/title"
                 android:maxLines="1"
+                android:transitionName="title"
                 android:ellipsize="end"
                 android:textColor="@android:color/black"
                 android:layout_width="match_parent"
@@ -43,10 +45,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
+                android:transitionName="author"
                 android:text="Author Name" />
 
             <TextView
                 android:id="@+id/updated"
+                android:transitionName="updated"
                 android:textColor="@color/colorAccent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -1,4 +1,4 @@
-package com.example.aalap.aalapsreddit;
+package com.example.aalap.aalapsreddit.Utils;
 
 import android.app.Application;
 
