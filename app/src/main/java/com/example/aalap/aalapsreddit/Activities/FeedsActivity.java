@@ -29,6 +29,7 @@ public class FeedsActivity extends AppCompatActivity {
     Button load;
     List<Entry> entries = new ArrayList<>();
     public static final String BASE_URL = "https://www.reddit.com/";
+    //  /api/login/userName?user=userName&passwd=Password&api_type=json
 
     RedditStore store;
 
@@ -60,7 +61,7 @@ public class FeedsActivity extends AppCompatActivity {
                 .doOnError(throwable -> Log.d(TAG, "loadFeed: onError " + throwable.getMessage()))
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnComplete(() -> {
-                    FeedAdapter adapter = new FeedAdapter(entries, this);
+                    FeedAdapter adapter = new FeedAdapter(entries, this, false);
                     recyclerView.setAdapter(adapter);
                 })
                 .subscribeOn(Schedulers.io())

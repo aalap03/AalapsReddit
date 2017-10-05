@@ -13,17 +13,20 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:orientation="horizontal"
+        android:weightSum="1"
         android:layout_height="match_parent">
         <ImageView
+            android:layout_weight=".2"
             android:id="@+id/feed_image"
-            android:layout_width="100dp"
+            android:layout_width="0dp"
             android:transitionName="image"
             android:layout_height="100dp"
             android:src="@drawable/reddit_default"
             />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight=".8"
             android:layout_height="match_parent"
             android:layout_marginLeft="5dp"
             android:gravity="center_vertical"
@@ -58,6 +61,16 @@
                 android:text="Updated" />
 
         </LinearLayout>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_weight=".1"
+            android:text="Reply"
+            android:visibility="gone"
+            android:id="@+id/reply_button"
+            android:layout_gravity="bottom"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_launcher"/>
     </LinearLayout>
 
 

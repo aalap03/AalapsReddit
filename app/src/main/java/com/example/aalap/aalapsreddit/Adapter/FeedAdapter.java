@@ -1,26 +1,26 @@
 package com.example.aalap.aalapsreddit.Adapter;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.aalap.aalapsreddit.Activities.CommentsActivity;
+import com.example.aalap.aalapsreddit.Models.Comments;
 import com.example.aalap.aalapsreddit.Models.Entry;
 import com.example.aalap.aalapsreddit.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import static com.example.aalap.aalapsreddit.Activities.FeedsActivity.BASE_URL;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 /**
  * Created by Aalap on 2017-10-01.
@@ -28,8 +28,9 @@ import static com.example.aalap.aalapsreddit.Activities.FeedsActivity.BASE_URL;
 
 public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder> {
 
-    List<Entry> entries;
+    List<?> items;
     Activity activity;
+    boolean isComments;
 
     private static final String TAG = "FeedAdapter";
     public static final String TITLE = "title";
@@ -38,9 +39,10 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
     public static final String IMAGE = "image";
     public static final String COMMENT_LINK = "link";
 
-    public FeedAdapter(List<Entry> entries, Activity activity) {
-        this.entries = entries;
+    public FeedAdapter(List<?> items, Activity activity, boolean isComments) {
+        this.items = items;
         this.activity = activity;
+        this.isComments = isComments;
     }
 
     @Override
@@ -50,38 +52,50 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
     @Override
     public void onBindViewHolder(FeedViewHolder holder, int position) {
-        Entry entry = entries.get(position);
-        holder.updatedAt.setText(entry.getUpdated());
-        holder.title.setText(entry.getTitle());
-        if (entry.getAuthor() != null)
-            holder.authorName.setText(entry.getAuthor().getName().replace("/u/", ""));
-        else
-            holder.authorName.setText("Aalap Patel");
 
-        if (!entry.getImageLink().isEmpty())
-            Picasso.with(activity)
-                    .load(entry.getImageLink())
-                    .error(R.drawable.reddit_default)
-                    .placeholder(R.mipmap.ic_launcher_round)
-                    .into(holder.imageView);
-        else {
-            Picasso.with(activity)
-                    .load(R.drawable.reddit_default)
-                    .into(holder.imageView);
+        holder.imageView.setVisibility(isComments ? GONE : VISIBLE);
+
+        if(!isComments){
+            Entry entry = (Entry) items.get(position);
+            holder.updatedAt.setText(entry.getUpdated());
+            holder.title.setText(entry.getTitle());
+            if (entry.getAuthor() != null)
+                holder.authorName.setText(entry.getAuthor().getName().replace("/u/", ""));
+            else
+                holder.authorName.setText("Aalap Patel");
+
+            if (!entry.getImageLink().isEmpty())
+                Picasso.with(activity)
+                        .load(entry.getImageLink())
+                        .error(R.drawable.reddit_default)
+                        .placeholder(R.mipmap.ic_launcher_round)
+                        .into(holder.imageView);
+            else {
+                Picasso.with(activity)
+                        .load(R.drawable.reddit_default)
+                        .into(holder.imageView);
+            }
+
+            holder.itemView.setOnClickListener(v -> holder.bindClick(entry));
         }
-
-        holder.itemView.setOnClickListener(v -> holder.bindClick(entry));
+        else{
+            Comments comment = (Comments) items.get(position);
+            holder.authorName.setText(comment.getAuthor());
+            holder.title.setText(comment.getComment());
+            holder.updatedAt.setText(comment.getUpdatedAt());
+        }
     }
 
     @Override
     public int getItemCount() {
-        return entries.size();
+        return items.size();
     }
 
     public class FeedViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imageView;
         TextView title, authorName, updatedAt;
+        Button reply;
 
         public FeedViewHolder(View itemView) {
             super(itemView);
@@ -89,6 +103,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             authorName = itemView.findViewById(R.id.author_name);
             updatedAt = itemView.findViewById(R.id.updated);
             imageView = itemView.findViewById(R.id.feed_image);
+            reply = itemView.findViewById(R.id.reply_button);
         }
 
         public void bindClick(Entry entry) {
