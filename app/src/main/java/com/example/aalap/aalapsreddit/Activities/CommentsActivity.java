@@ -1,5 +1,6 @@
 package com.example.aalap.aalapsreddit.Activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,25 +20,23 @@ import android.widget.Toast;
 import com.example.aalap.aalapsreddit.Adapter.FeedAdapter;
 import com.example.aalap.aalapsreddit.Models.Comments;
 import com.example.aalap.aalapsreddit.Models.Entry;
-import com.example.aalap.aalapsreddit.Models.Feed;
 import com.example.aalap.aalapsreddit.Models.RedditStore;
 import com.example.aalap.aalapsreddit.R;
-import com.example.aalap.aalapsreddit.Service.RedditService;
+import com.example.aalap.aalapsreddit.Utils.EventMsg;
+import com.example.aalap.aalapsreddit.Utils.Preference;
 import com.example.aalap.aalapsreddit.Utils.RedditApp;
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import static com.example.aalap.aalapsreddit.Activities.FeedsActivity.BASE_URL;
 
@@ -51,6 +50,9 @@ public class CommentsActivity extends AppCompatActivity {
     List<Comments> comments = new ArrayList<>();
     Disposable subscribe;
     ViewGroup parent;
+    Preference preference;
+    EventBus eventBus = EventBus.getDefault();
+    AlertDialog alertDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +60,8 @@ public class CommentsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_comments);
 
         store = new RedditStore(this);
+        preference = new Preference(getApplicationContext());
+
         parent = findViewById(R.id.comment_screen_root);
         recyclerView = findViewById(R.id.comment_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -70,7 +74,7 @@ public class CommentsActivity extends AppCompatActivity {
         ImageView imageView = view.findViewById(R.id.feed_image);
         Button reply = view.findViewById(R.id.reply_button);
         reply.setVisibility(View.VISIBLE);
-        reply.setOnClickListener(v -> openCOmmentDialog());
+        reply.setOnClickListener(v -> openDialog());
 
         author.setText(intent.getStringExtra(FeedAdapter.AUTHOR));
         updated.setText(intent.getStringExtra(FeedAdapter.UPDATED));
@@ -128,29 +132,55 @@ public class CommentsActivity extends AppCompatActivity {
                 .subscribe();
     }
 
-    private void openCOmmentDialog() {
+    private void openDialog() {
+        AlertDialog.Builder dialoBuilder = new AlertDialog.Builder(this);
+        if (!preference.getMogHash().isEmpty())
+            openCommentDialog(dialoBuilder);
+        else
+            openLoginDialog(dialoBuilder);
+    }
 
-        
+    void openCommentDialog(AlertDialog.Builder dialoBuilder) {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.post_comment_dialog, parent, false);
         EditText comment = dialogView.findViewById(R.id.comment);
         Button cancel = dialogView.findViewById(R.id.button_cancel_comment);
         Button post = dialogView.findViewById(R.id.button_post_comment);
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setView(view).create();
-        dialog.show();
-
+        AlertDialog customDialog = dialoBuilder.create();
+        customDialog.setView(dialogView);
+        customDialog.show();
         String commentValue = comment.getText().toString().trim();
-        cancel.setOnClickListener(v -> dialog.dismiss());
+        cancel.setOnClickListener(v -> customDialog.dismiss());
         post.setOnClickListener(v -> postComment(commentValue));
     }
 
+    void openLoginDialog(AlertDialog.Builder dialoBuilder) {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.activity_login, parent, false);
+
+        alertDialog = dialoBuilder.create();
+
+        EditText userName = dialogView.findViewById(R.id.email);
+        EditText password = dialogView.findViewById(R.id.password);
+        TextView noThanks = dialogView.findViewById(R.id.as_guest);
+        noThanks.setText("No thanks");
+        noThanks.setOnClickListener(v->alertDialog.dismiss());
+        Button login = dialogView.findViewById(R.id.email_sign_in_button);
+        login.setOnClickListener(v -> LoginActivity.attemptLogin(CommentsActivity.this, userName, password, store));
+
+        alertDialog.setView(dialogView);
+        alertDialog.show();
+    }
+
     private void postComment(String commentValue) {
-        if (commentValue != null && !commentValue.isEmpty()){
+        if (commentValue != null && !commentValue.isEmpty()) {
 
-        }
-
-        else
+        } else
             Toast.makeText(CommentsActivity.this, "No comment to post", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        eventBus.register(this);
     }
 
     @Override
@@ -158,5 +188,19 @@ public class CommentsActivity extends AppCompatActivity {
         super.onStop();
         if (subscribe != null && !subscribe.isDisposed())
             subscribe.dispose();
+
+        if(eventBus.isRegistered(this))
+            eventBus.unregister(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(EventMsg eventMsg){
+
+        if(eventMsg.getMsg().equalsIgnoreCase("LOGIN")){
+           if(alertDialog!=null){
+               alertDialog.dismiss();
+               Toast.makeText(this, "Logged in successfully", Toast.LENGTH_SHORT).show();
+           }
+        }
     }
 }
