@@ -39,6 +39,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.example.aalap.aalapsreddit.Activities.FeedsActivity.BASE_URL;
+import static com.example.aalap.aalapsreddit.Adapter.FeedAdapter.ID;
 
 public class CommentsActivity extends AppCompatActivity {
 
@@ -117,6 +118,7 @@ public class CommentsActivity extends AppCompatActivity {
                                 , entry.getAuthor() == null ? "Author" : entry.getAuthor().getName().replace("/u/", "")
                                 , entry.getId());
                         comments.add(comment);
+                        Log.d(TAG, "commentId: "+entry.getId());
                     }
                     return comments;
                 })
@@ -140,20 +142,23 @@ public class CommentsActivity extends AppCompatActivity {
             openLoginDialog(dialoBuilder);
     }
 
-    void openCommentDialog(AlertDialog.Builder dialoBuilder) {
+    public void openCommentDialog(AlertDialog.Builder dialoBuilder) {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.post_comment_dialog, parent, false);
         EditText comment = dialogView.findViewById(R.id.comment);
         Button cancel = dialogView.findViewById(R.id.button_cancel_comment);
         Button post = dialogView.findViewById(R.id.button_post_comment);
-        AlertDialog customDialog = dialoBuilder.create();
-        customDialog.setView(dialogView);
-        customDialog.show();
-        String commentValue = comment.getText().toString().trim();
-        cancel.setOnClickListener(v -> customDialog.dismiss());
-        post.setOnClickListener(v -> postComment(commentValue));
+        alertDialog = dialoBuilder.create();
+        alertDialog.setView(dialogView);
+        alertDialog.show();
+
+        cancel.setOnClickListener(v -> alertDialog.dismiss());
+        post.setOnClickListener(v -> {
+            String commentValue = comment.getText().toString().trim();
+            postComment(commentValue);
+        });
     }
 
-    void openLoginDialog(AlertDialog.Builder dialoBuilder) {
+    public void openLoginDialog(AlertDialog.Builder dialoBuilder) {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.activity_login, parent, false);
 
         alertDialog = dialoBuilder.create();
@@ -172,7 +177,7 @@ public class CommentsActivity extends AppCompatActivity {
 
     private void postComment(String commentValue) {
         if (commentValue != null && !commentValue.isEmpty()) {
-
+            store.postComment(getIntent().getStringExtra(ID), commentValue );
         } else
             Toast.makeText(CommentsActivity.this, "No comment to post", Toast.LENGTH_SHORT).show();
     }
@@ -196,11 +201,14 @@ public class CommentsActivity extends AppCompatActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(EventMsg eventMsg){
 
-        if(eventMsg.getMsg().equalsIgnoreCase("LOGIN")){
-           if(alertDialog!=null){
-               alertDialog.dismiss();
-               Toast.makeText(this, "Logged in successfully", Toast.LENGTH_SHORT).show();
-           }
+        if(eventMsg.getMsg()!=null){
+            if(alertDialog!=null)
+                alertDialog.dismiss();
+            if(eventMsg.getMsg().equalsIgnoreCase("LOGIN"))
+                Toast.makeText(this, "Logged in successfully", Toast.LENGTH_SHORT).show();
+            else if(eventMsg.getMsg().equalsIgnoreCase("COMMENT_POSTED"))
+                Toast.makeText(this, "Comment posted successfully", Toast.LENGTH_SHORT).show();
+
         }
     }
 }

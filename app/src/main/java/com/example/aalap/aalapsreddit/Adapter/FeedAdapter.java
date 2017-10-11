@@ -3,6 +3,7 @@ package com.example.aalap.aalapsreddit.Adapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +38,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
     public static final String AUTHOR = "auhtor";
     public static final String UPDATED = "updated";
     public static final String IMAGE = "image";
+    public static final String ID = "id";
     public static final String COMMENT_LINK = "link";
 
     public FeedAdapter(List<?> items, Activity activity, boolean isComments) {
@@ -116,6 +118,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             intent.putExtra(AUTHOR, entry.getAuthor().getName());
             intent.putExtra(IMAGE, entry.getImageLink());
             intent.putExtra(UPDATED, entry.getUpdated());
+            intent.putExtra(ID, entry.getId());
             intent.putExtra(COMMENT_LINK, entry.getCommentLink());
 
             ActivityOptionsCompat optionsCompat = ActivityOptionsCompat
@@ -125,6 +128,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                 activity.startActivity(intent, optionsCompat.toBundle());
             } else
                 activity.startActivity(intent);
+        }
+        public void commentClick(Comments comment){
+            new CommentsActivity().openCommentDialog(new AlertDialog.Builder(activity));
         }
     }
 }
