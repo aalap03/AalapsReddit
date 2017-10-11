@@ -2,6 +2,7 @@ package com.example.aalap.aalapsreddit.Models;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.EventLog;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -84,7 +85,7 @@ public class RedditStore {
 
 
                     } else {
-                        Log.d(TAG, "attemptLogin: error " + response.errorBody().string());
+                        //Log.d(TAG, "attemptLogin: error " + response.errorBody().string());
                         throw new RuntimeException("Login error:" + response.errorBody().string());
                     }
                 })
@@ -113,18 +114,12 @@ public class RedditStore {
         hashMap.put("X-Modhash", preference.getMogHash());
         hashMap.put("cookie", "reddit_session=" + preference.getCookie());
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://www.reddit.com/api/")
-                .addConverterFactory(SimpleXmlConverterFactory.create())
-                .build();
-        RedditService redditService = retrofit.create(RedditService.class);
-
-
         RedditApp.getRetrofit().postComment(hashMap, "comment", parentId, commentText)
                 .map(response -> {
                     if (!response.isSuccessful())
                         throw new RuntimeException("Posting error:" + response.errorBody().string());
                     else{
+                        Log.d(TAG, "postComment: "+response.body().string());
                         return Observable.empty();
                     }
                 })
@@ -137,7 +132,7 @@ public class RedditStore {
                 .subscribe(result -> {
                     Log.d(TAG, "postComment: sub res ");
                     eventBus.register(this);
-                    eventBus.post("COMMENT_POSTED");
+                    eventBus.post(new EventMsg("COMMENT_POSTED"));
                     eventBus.unregister(this);
                 }, throwable -> Log.d(TAG, "postComment: sub err"));
 

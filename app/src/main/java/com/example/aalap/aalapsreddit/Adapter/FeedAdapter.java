@@ -129,8 +129,10 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             } else
                 activity.startActivity(intent);
         }
-        public void commentClick(Comments comment){
+
+        public void commentClick(Comments commen){
             new CommentsActivity().openCommentDialog(new AlertDialog.Builder(activity));
         }
+
     }
 }

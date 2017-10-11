@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.aalap.aalapsreddit.Adapter.FeedAdapter;
 import com.example.aalap.aalapsreddit.Models.Entry;
@@ -65,7 +66,7 @@ public class FeedsActivity extends AppCompatActivity {
                     recyclerView.setAdapter(adapter);
                 })
                 .subscribeOn(Schedulers.io())
-                .subscribe();
+                .subscribe(entries1 -> {}, throwable -> Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
 }
