@@ -16,6 +16,8 @@ import com.example.aalap.aalapsreddit.Activities.CommentsActivity;
 import com.example.aalap.aalapsreddit.Models.Comments;
 import com.example.aalap.aalapsreddit.Models.Entry;
 import com.example.aalap.aalapsreddit.R;
+import com.example.aalap.aalapsreddit.Utils.DialogUtils;
+import com.example.aalap.aalapsreddit.Utils.RedditApp;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -32,6 +34,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
     List<?> items;
     Activity activity;
     boolean isComments;
+    ViewGroup dialogContainer;
 
     private static final String TAG = "FeedAdapter";
     public static final String TITLE = "title";
@@ -49,6 +52,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
     @Override
     public FeedViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        dialogContainer = parent;
         return new FeedViewHolder(LayoutInflater.from(activity).inflate(R.layout.card_items, parent, false));
     }
 
@@ -85,6 +89,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             holder.authorName.setText(comment.getAuthor());
             holder.title.setText(comment.getComment());
             holder.updatedAt.setText(comment.getUpdatedAt());
+            holder.itemView.setOnClickListener(v -> holder.commentClick(comment));
         }
     }
 
@@ -130,8 +135,15 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                 activity.startActivity(intent);
         }
 
-        public void commentClick(Comments commen){
-            new CommentsActivity().openCommentDialog(new AlertDialog.Builder(activity));
+        public void commentClick(Comments comment){
+
+            AlertDialog.Builder dialoBuilder = new AlertDialog.Builder(activity);
+            DialogUtils dialogUtils = new DialogUtils(activity);
+
+            if (!RedditApp.getPreference(activity.getApplicationContext()).getMogHash().isEmpty())
+                dialogUtils.openCommentDialog(activity, dialogContainer, comment.getId(), dialoBuilder);
+            else
+                dialogUtils.openLoginDialog(dialoBuilder, dialogContainer);
         }
 
     }

@@ -1,6 +1,7 @@
 package com.example.aalap.aalapsreddit.Utils;
 
 import android.app.Application;
+import android.content.Context;
 
 import com.example.aalap.aalapsreddit.Service.RedditService;
 
@@ -30,5 +31,9 @@ public class RedditApp extends Application {
         RedditService redditService = retrofit.create(RedditService.class);
 
         return redditService;
+    }
+
+    public static Preference getPreference(Context context){
+        return new Preference(context);
     }
 }

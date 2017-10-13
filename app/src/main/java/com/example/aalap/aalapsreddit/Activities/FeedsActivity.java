@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -18,6 +19,7 @@ import com.example.aalap.aalapsreddit.Utils.RedditApp;
 import java.util.ArrayList;
 import java.util.List;
 
+import es.dmoral.toasty.Toasty;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -38,6 +40,8 @@ public class FeedsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feeds_screen);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         store = new RedditStore(this);
         recyclerView = findViewById(R.id.recyclerview);
         feedName = findViewById(R.id.feed_name);
@@ -66,7 +70,7 @@ public class FeedsActivity extends AppCompatActivity {
                     recyclerView.setAdapter(adapter);
                 })
                 .subscribeOn(Schedulers.io())
-                .subscribe(entries1 -> {}, throwable -> Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_SHORT).show());
+                .subscribe(entries1 -> {}, throwable -> Toasty.error(this, throwable.getMessage()).show());
     }
 
 }

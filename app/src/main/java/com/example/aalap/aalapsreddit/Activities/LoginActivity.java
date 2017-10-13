@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -21,6 +22,8 @@ import com.example.aalap.aalapsreddit.Utils.Preference;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import es.dmoral.toasty.Toasty;
 
 /**
  * A login screen that offers login via email/password.
@@ -41,6 +44,8 @@ public class LoginActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         userNameView = findViewById(R.id.email);
         asGuest = findViewById(R.id.as_guest);
         store = new RedditStore(this);
@@ -74,7 +79,7 @@ public class LoginActivity extends AppCompatActivity{
         if(email!=null && !email.isEmpty() && password!=null && !password.isEmpty()){
             store.login(header, email, password);
         }else
-            Toast.makeText(context, "Please fill both values", Toast.LENGTH_SHORT).show();
+            Toasty.warning(context, "Please fill both values").show();
     }
 }
 

@@ -1,5 +1,6 @@
 package com.example.aalap.aalapsreddit.Activities;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -22,6 +24,7 @@ import com.example.aalap.aalapsreddit.Models.Comments;
 import com.example.aalap.aalapsreddit.Models.Entry;
 import com.example.aalap.aalapsreddit.Models.RedditStore;
 import com.example.aalap.aalapsreddit.R;
+import com.example.aalap.aalapsreddit.Utils.DialogUtils;
 import com.example.aalap.aalapsreddit.Utils.EventMsg;
 import com.example.aalap.aalapsreddit.Utils.Preference;
 import com.example.aalap.aalapsreddit.Utils.RedditApp;
@@ -34,6 +37,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
+import es.dmoral.toasty.Toasty;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -59,13 +63,16 @@ public class CommentsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comments);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         store = new RedditStore(this);
         preference = new Preference(getApplicationContext());
 
         parent = findViewById(R.id.comment_screen_root);
         recyclerView = findViewById(R.id.comment_recycler);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setItemPrefetchEnabled(false);
+        recyclerView.setLayoutManager(layoutManager);
         intent = getIntent();
         view = findViewById(R.id.current_item);
 
@@ -103,11 +110,10 @@ public class CommentsActivity extends AppCompatActivity {
                         throw new RuntimeException("Error while fetching comments, code: " + response.code());
                     }
                 })
-                .map(entries -> {
+                .doOnNext(entries -> {
                     comments = new ArrayList<>();
                     for (Entry entry : entries) {
                         Log.d(TAG, "content: " + entry.getContent());
-
                         String[] firstSplit = entry.getContent().split("<p>");
                         String commentText = "NONE";
                         if (firstSplit != null && firstSplit.length > 1) {
@@ -118,9 +124,8 @@ public class CommentsActivity extends AppCompatActivity {
                                 , entry.getAuthor() == null ? "Author" : entry.getAuthor().getName().replace("/u/", "")
                                 , entry.getId());
                         comments.add(comment);
-                        Log.d(TAG, "commentId: "+entry.getId());
+                        Log.d(TAG, "commentId: " + entry.getId());
                     }
-                    return comments;
                 })
                 .doOnError(throwable -> {
                     throw new RuntimeException(throwable.getMessage());
@@ -136,50 +141,12 @@ public class CommentsActivity extends AppCompatActivity {
 
     private void openDialog() {
         AlertDialog.Builder dialoBuilder = new AlertDialog.Builder(this);
+        DialogUtils dialogUtils = new DialogUtils(this);
+
         if (!preference.getMogHash().isEmpty())
-            openCommentDialog(dialoBuilder);
+            dialogUtils.openCommentDialog(this, parent, getIntent().getStringExtra(ID), dialoBuilder);
         else
-            openLoginDialog(dialoBuilder);
-    }
-
-    public void openCommentDialog(AlertDialog.Builder dialoBuilder) {
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.post_comment_dialog, parent, false);
-        EditText comment = dialogView.findViewById(R.id.comment);
-        Button cancel = dialogView.findViewById(R.id.button_cancel_comment);
-        Button post = dialogView.findViewById(R.id.button_post_comment);
-        alertDialog = dialoBuilder.create();
-        alertDialog.setView(dialogView);
-        alertDialog.show();
-
-        cancel.setOnClickListener(v -> alertDialog.dismiss());
-        post.setOnClickListener(v -> {
-            String commentValue = comment.getText().toString().trim();
-            postComment(commentValue);
-        });
-    }
-
-    public void openLoginDialog(AlertDialog.Builder dialoBuilder) {
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.activity_login, parent, false);
-
-        alertDialog = dialoBuilder.create();
-
-        EditText userName = dialogView.findViewById(R.id.email);
-        EditText password = dialogView.findViewById(R.id.password);
-        TextView noThanks = dialogView.findViewById(R.id.as_guest);
-        noThanks.setText("No thanks");
-        noThanks.setOnClickListener(v->alertDialog.dismiss());
-        Button login = dialogView.findViewById(R.id.email_sign_in_button);
-        login.setOnClickListener(v -> LoginActivity.attemptLogin(CommentsActivity.this, userName, password, store));
-
-        alertDialog.setView(dialogView);
-        alertDialog.show();
-    }
-
-    private void postComment(String commentValue) {
-        if (commentValue != null && !commentValue.isEmpty()) {
-            store.postComment(getIntent().getStringExtra(ID), commentValue );
-        } else
-            Toast.makeText(CommentsActivity.this, "No comment to post", Toast.LENGTH_SHORT).show();
+            dialogUtils.openLoginDialog(dialoBuilder, parent);
     }
 
     @Override
@@ -194,20 +161,22 @@ public class CommentsActivity extends AppCompatActivity {
         if (subscribe != null && !subscribe.isDisposed())
             subscribe.dispose();
 
-        if(eventBus.isRegistered(this))
+        if (eventBus.isRegistered(this))
             eventBus.unregister(this);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(EventMsg eventMsg){
+    public void onEvent(EventMsg eventMsg) {
 
-        if(eventMsg.getMsg()!=null){
-            if(alertDialog!=null)
+        if (eventMsg.getMsg() != null) {
+            if (alertDialog != null)
                 alertDialog.dismiss();
-            if(eventMsg.getMsg().equalsIgnoreCase("LOGIN"))
-                Toast.makeText(this, "Logged in successfully", Toast.LENGTH_SHORT).show();
-            else if(eventMsg.getMsg().equalsIgnoreCase("COMMENT_POSTED"))
-                Toast.makeText(this, "Comment posted successfully", Toast.LENGTH_SHORT).show();
+            if (eventMsg.getMsg().equalsIgnoreCase("LOGIN"))
+                Toasty.success(this, "Logged in successfully").show();
+            else if (eventMsg.getMsg().equalsIgnoreCase("COMMENT_POSTED"))
+                Toasty.success(this, "Comment posted successfully").show();
+            else if (eventMsg.getMsg().equalsIgnoreCase("ERROR_COMMENT"))
+                Toasty.error(this, "Could not post comment: are you signed in?").show();
 
         }
     }

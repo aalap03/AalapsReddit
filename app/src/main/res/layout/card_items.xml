@@ -66,6 +66,7 @@
             android:layout_width="wrap_content"
             android:layout_weight=".1"
             android:text="Reply"
+            android:background="@drawable/reddit_button"
             android:visibility="gone"
             android:id="@+id/reply_button"
             android:layout_gravity="bottom"

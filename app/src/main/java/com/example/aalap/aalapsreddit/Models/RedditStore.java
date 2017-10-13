@@ -2,13 +2,10 @@ package com.example.aalap.aalapsreddit.Models;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.EventLog;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.aalap.aalapsreddit.Activities.FeedsActivity;
 import com.example.aalap.aalapsreddit.Activities.LoginActivity;
-import com.example.aalap.aalapsreddit.Service.RedditService;
 import com.example.aalap.aalapsreddit.Utils.EventMsg;
 import com.example.aalap.aalapsreddit.Utils.ExtractData;
 import com.example.aalap.aalapsreddit.Utils.Preference;
@@ -19,21 +16,15 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import es.dmoral.toasty.Toasty;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 /**
  * Created by aalap on 2017-10-03.
@@ -84,10 +75,8 @@ public class RedditStore {
                         }
 
 
-                    } else {
-                        //Log.d(TAG, "attemptLogin: error " + response.errorBody().string());
+                    } else
                         throw new RuntimeException("Login error:" + response.errorBody().string());
-                    }
                 })
                 .doOnComplete(() -> Log.d(TAG, "attemptLogin: completed"))
                 .observeOn(AndroidSchedulers.mainThread())
@@ -95,7 +84,7 @@ public class RedditStore {
                 .subscribe(result -> {
                     if (context instanceof LoginActivity) {
                         context.startActivity(new Intent(context, FeedsActivity.class));
-                        Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show();
+                        Toasty.success(context, "Login successful").show();
                     } else {
                         eventBus.register(this);
                         eventBus.post(new EventMsg("LOGIN"));
@@ -104,7 +93,7 @@ public class RedditStore {
 
                 }, throwable -> {
                     Log.d(TAG, "login: " + throwable.getMessage());
-                    Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toasty.error(context, throwable.getMessage()).show();
                 });
     }
 
@@ -114,25 +103,34 @@ public class RedditStore {
         hashMap.put("X-Modhash", preference.getMogHash());
         hashMap.put("cookie", "reddit_session=" + preference.getCookie());
 
+//        Log.d(TAG, "postComment: hashMap "+hashMap);
+//        Log.d(TAG, "postComment: cookie "+preference.getCookie());
+//        Log.d(TAG, "postComment: user "+preference.getUserName());
+//        Log.d(TAG, "postComment: modHash"+preference.getMogHash());
+//        Log.d(TAG, "postComment: parentId"+parentId);
+//        Log.d(TAG, "postComment: comment "+commentText);
+
         RedditApp.getRetrofit().postComment(hashMap, "comment", parentId, commentText)
                 .map(response -> {
                     if (!response.isSuccessful())
                         throw new RuntimeException("Posting error:" + response.errorBody().string());
-                    else{
-                        Log.d(TAG, "postComment: "+response.body().string());
-                        return Observable.empty();
+                    else {
+                        String stringResopnse = response.body().string();
+                        JSONObject jsonObject = new JSONObject(stringResopnse);
+                        Log.d(TAG, "postComment: " + stringResopnse);
+                        return jsonObject.getBoolean("success");
                     }
                 })
                 .doOnError(throwable -> {
                     Log.d(TAG, "postComment:onError ");
-                    throw new RuntimeException("Posting error:"+throwable.getMessage());
+                    throw new RuntimeException("Posting error:" + throwable.getMessage());
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
                     Log.d(TAG, "postComment: sub res ");
                     eventBus.register(this);
-                    eventBus.post(new EventMsg("COMMENT_POSTED"));
+                    eventBus.post(new EventMsg(result ? "COMMENT_POSTED" : "ERROR_COMMENT"));
                     eventBus.unregister(this);
                 }, throwable -> Log.d(TAG, "postComment: sub err"));
 
