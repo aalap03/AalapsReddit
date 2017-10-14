@@ -1,6 +1,7 @@
 package com.example.aalap.aalapsreddit.Service;
 
 import com.example.aalap.aalapsreddit.Models.Feed;
+import com.example.aalap.aalapsreddit.Models.Items;
 
 import java.util.Map;
 
@@ -8,12 +9,8 @@ import io.reactivex.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
-import retrofit2.http.Header;
 import retrofit2.http.HeaderMap;
-import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -24,8 +21,14 @@ import retrofit2.http.Query;
 
 public interface RedditService {
 
+    @GET("api.json?rss_url=https%3A%2F%2Fwww.reddit.com%2F.rss")
+    Observable<Response<Items>> getSubRedditsm();
+
     @GET("r/{path}/.rss")
     Observable<Response<Feed>> getFeedsO(@Path("path") String text);
+
+    @GET(".rss")
+    Observable<Response<Feed>> getSubReddits();
 
     @GET("{path}.rss")
     Observable<Response<Feed>> getCommentFeeds(@Path("path") String text);

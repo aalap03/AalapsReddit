@@ -17,7 +17,6 @@ public class Entry {
     @Element(name = "updated")
     String updated;
 
-
     @Element(required = false, name = "author")
     Author author;
 
@@ -88,7 +87,7 @@ public class Entry {
         this.content = content;
     }
 
-//    public String getLink() {
+    //    public String getLink() {
 //        return link;
 //    }
 //

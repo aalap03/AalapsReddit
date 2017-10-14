@@ -2,11 +2,10 @@ package com.example.aalap.aalapsreddit.Activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -14,16 +13,30 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.aalap.aalapsreddit.Models.Categories;
+import com.example.aalap.aalapsreddit.Models.Entry;
 import com.example.aalap.aalapsreddit.Models.RedditStore;
 import com.example.aalap.aalapsreddit.R;
+import com.example.aalap.aalapsreddit.Service.RedditService;
 import com.example.aalap.aalapsreddit.Utils.Preference;
+import com.example.aalap.aalapsreddit.Utils.RedditApp;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
+
+import static com.example.aalap.aalapsreddit.Activities.FeedsActivity.BASE_URL;
 
 /**
  * A login screen that offers login via email/password.
@@ -39,6 +52,7 @@ public class LoginActivity extends AppCompatActivity{
     TextView asGuest;
     RedditStore store;
     Preference preference;
+    List<String> feedCategories = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +82,50 @@ public class LoginActivity extends AppCompatActivity{
         mEmailSignInButton.setOnClickListener(view -> attemptLogin(LoginActivity.this, userNameView, mPasswordView, store));
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.rss2json.com/v1/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+        RedditService redditService = retrofit.create(RedditService.class);
+
+        redditService.getSubRedditsm()
+                .flatMap(result->{
+                    if(result.isSuccessful()){
+                        List<Categories> categories = result.body().getCategories();
+                        for (Categories category : categories) {
+                            feedCategories.add(category.getCategories().get(0));
+                        }
+                    }else{
+                        Log.d(TAG, "onCreate: err "+result.errorBody().string());
+                    }
+                    return Observable.empty();
+                })
+                .doOnError(throwable -> Log.d(TAG, "onCreate: "+throwable.getMessage()))
+                .doOnComplete(() -> Log.d(TAG, "onCreate: "))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(res->{}, throwable -> Log.d(TAG, "onCreate: suberr "+throwable.getMessage()));
+//        RedditApp.getRetrofit().getSubReddits()
+//                .flatMap(result -> {
+//                    if (result.isSuccessful()) {
+//                        List<Entry> entry = result.body().getEntry();
+//                        for (Entry entry1 : entry) {
+//                            Log.d(TAG, "entry: "+entry1.toString());
+//                        }
+//                        return Observable.empty();
+//                    } else {
+//                        String error = result.errorBody().string();
+//                        Log.d(TAG, "onCreate: subRed:"+error);
+//                        throw new RuntimeException(error);
+//                    }
+//                })
+//                .doOnError(throwable -> Log.d(TAG, "onCreate: subRed: onError"))
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribeOn(Schedulers.io())
+//                .subscribe(result -> {
+//                }, throwable -> Log.d(TAG, "onCreate: sub subRed: " + throwable.getMessage()));
     }
 
     public static void attemptLogin(Context context, EditText userNameView, EditText mPasswordView, RedditStore store) {

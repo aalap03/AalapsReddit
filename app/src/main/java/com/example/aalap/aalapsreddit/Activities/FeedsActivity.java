@@ -52,11 +52,13 @@ public class FeedsActivity extends AppCompatActivity {
 
     private void loadFeed() {
 
+        Log.d(TAG, "loadFeed: ");
         entries = new ArrayList<>();
 
         RedditApp.getRetrofit().getFeedsO(feedName.getText().toString().trim())
                 .map( feedResponse -> {
                     if (feedResponse.isSuccessful()) {
+                        Log.d(TAG, "loadFeed: "+feedResponse.body().toString());
                         return store.getEntryList(feedResponse);
                     } else {
                         throw new RuntimeException("Error while loading feed:" + feedResponse.code());
@@ -66,6 +68,7 @@ public class FeedsActivity extends AppCompatActivity {
                 .doOnError(throwable -> Log.d(TAG, "loadFeed: onError " + throwable.getMessage()))
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnComplete(() -> {
+                    Log.d(TAG, "loadFeed: "+entries.size());
                     FeedAdapter adapter = new FeedAdapter(entries, this, false);
                     recyclerView.setAdapter(adapter);
                 })

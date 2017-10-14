@@ -1,7 +1,5 @@
 package com.example.aalap.aalapsreddit.Activities;
 
-import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -9,15 +7,12 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.aalap.aalapsreddit.Adapter.FeedAdapter;
 import com.example.aalap.aalapsreddit.Models.Comments;
@@ -91,11 +86,11 @@ public class CommentsActivity extends AppCompatActivity {
         if (!intent.getStringExtra(FeedAdapter.IMAGE).isEmpty())
             Picasso.with(this)
                     .load(intent.getStringExtra(FeedAdapter.IMAGE))
-                    .error(R.drawable.reddit_default)
+                    .error(R.drawable.reddit_default_background)
                     .into(imageView);
         else
             Picasso.with(this)
-                    .load(R.drawable.reddit_default)
+                    .load(R.drawable.reddit_default_background)
                     .into(imageView);
 
 

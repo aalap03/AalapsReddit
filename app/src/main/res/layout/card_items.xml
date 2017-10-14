@@ -21,7 +21,7 @@
             android:layout_width="0dp"
             android:transitionName="image"
             android:layout_height="100dp"
-            android:src="@drawable/reddit_default"
+            android:src="@drawable/reddit_default_background"
             />
 
         <LinearLayout

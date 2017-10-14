@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.aalap.aalapsreddit">
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
@@ -10,9 +11,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/reddit_default"
+        android:icon="@drawable/reddit_default_background"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/reddit_default"
+        android:roundIcon="@drawable/reddit_default_background"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
@@ -25,7 +26,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".Activities.FeedsActivity" />
-        <activity android:name=".Activities.CommentsActivity"></activity>
+        <activity android:name=".Activities.CommentsActivity" />
+        <activity android:name=".Activities.SubRedditsActivity"></activity>
     </application>
 
 </manifest>

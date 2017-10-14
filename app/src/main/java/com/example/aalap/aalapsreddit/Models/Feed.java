@@ -15,14 +15,14 @@ public class Feed {
 
     @Element(name = "updated")
     String updated;
-    @Element(name = "icon")
-    String icon;
+
     @Element(name = "id")
     String id;
     @Element(name = "title")
     String title;
-    @Element(name = "subtitle")
+    @Element(name = "subtitle", required = false)
     String subtitle;
+
     @ElementList(inline = true, name = "entry")
     List<Entry> entry;
 
@@ -34,11 +34,11 @@ public class Feed {
         this.entry = entry;
     }
 
-    public String getCategory() {
+    public String getSubtitle() {
         return subtitle;
     }
 
-    public void setCategory(String subtitle) {
+    public void setSubtitle(String subtitle) {
         this.subtitle = subtitle;
     }
 
@@ -48,14 +48,6 @@ public class Feed {
 
     public void setUpdated(String updated) {
         this.updated = updated;
-    }
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon;
     }
 
     public String getId() {
@@ -78,7 +70,6 @@ public class Feed {
     public String toString() {
         return "Feed{" +
                 "updated='" + updated + '\n' +
-                ", icon='" + icon + '\n' +
                 ", id='" + id + '\n' +
                 ", title='" + title + '\n' +
                 ", subtitle='" + subtitle + '\n' +
