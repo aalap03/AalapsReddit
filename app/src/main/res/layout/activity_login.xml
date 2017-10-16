@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     tools:context="com.example.aalap.aalapsreddit.Activities.LoginActivity">
@@ -69,7 +70,7 @@
                 android:text="@string/action_sign_in"
                 android:textStyle="bold" />
 
-            <TextView
+            <com.example.aalap.aalapsreddit.Utils.MyTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"

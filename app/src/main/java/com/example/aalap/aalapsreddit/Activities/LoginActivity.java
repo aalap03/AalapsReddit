@@ -3,30 +3,23 @@ package com.example.aalap.aalapsreddit.Activities;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import com.example.aalap.aalapsreddit.Models.Categories;
-import com.example.aalap.aalapsreddit.Models.Entry;
 import com.example.aalap.aalapsreddit.Models.RedditStore;
 import com.example.aalap.aalapsreddit.R;
 import com.example.aalap.aalapsreddit.Service.RedditService;
 import com.example.aalap.aalapsreddit.Utils.Preference;
-import com.example.aalap.aalapsreddit.Utils.RedditApp;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import es.dmoral.toasty.Toasty;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -34,9 +27,6 @@ import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
-
-import static com.example.aalap.aalapsreddit.Activities.FeedsActivity.BASE_URL;
 
 /**
  * A login screen that offers login via email/password.
@@ -44,15 +34,12 @@ import static com.example.aalap.aalapsreddit.Activities.FeedsActivity.BASE_URL;
 public class LoginActivity extends AppCompatActivity{
 
     private static final String TAG = "LoginActivity";
-    // UI references.
     private AutoCompleteTextView userNameView;
     private EditText mPasswordView;
-    private View mProgressView;
-    private View mLoginFormView;
     TextView asGuest;
     RedditStore store;
     Preference preference;
-    List<String> feedCategories = new ArrayList<>();
+    ArrayList<String> feedCategories = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +54,9 @@ public class LoginActivity extends AppCompatActivity{
         asGuest.setOnClickListener(v -> {
             preference.setCookie("");
             preference.setModHash("");
-            startActivity(new Intent(this, FeedsActivity.class));
+            Intent intent = new Intent(this, SubRedditsActivity.class);
+            intent.putStringArrayListExtra("cat", feedCategories);
+            startActivity(intent);
         });
         mPasswordView = findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener((textView, id, keyEvent) -> {
@@ -80,16 +69,12 @@ public class LoginActivity extends AppCompatActivity{
 
         Button mEmailSignInButton = findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(view -> attemptLogin(LoginActivity.this, userNameView, mPasswordView, store));
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
-
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.rss2json.com/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
         RedditService redditService = retrofit.create(RedditService.class);
-
         redditService.getSubRedditsm()
                 .flatMap(result->{
                     if(result.isSuccessful()){
@@ -106,26 +91,7 @@ public class LoginActivity extends AppCompatActivity{
                 .doOnComplete(() -> Log.d(TAG, "onCreate: "))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(res->{}, throwable -> Log.d(TAG, "onCreate: suberr "+throwable.getMessage()));
-//        RedditApp.getRetrofit().getSubReddits()
-//                .flatMap(result -> {
-//                    if (result.isSuccessful()) {
-//                        List<Entry> entry = result.body().getEntry();
-//                        for (Entry entry1 : entry) {
-//                            Log.d(TAG, "entry: "+entry1.toString());
-//                        }
-//                        return Observable.empty();
-//                    } else {
-//                        String error = result.errorBody().string();
-//                        Log.d(TAG, "onCreate: subRed:"+error);
-//                        throw new RuntimeException(error);
-//                    }
-//                })
-//                .doOnError(throwable -> Log.d(TAG, "onCreate: subRed: onError"))
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribeOn(Schedulers.io())
-//                .subscribe(result -> {
-//                }, throwable -> Log.d(TAG, "onCreate: sub subRed: " + throwable.getMessage()));
+                .subscribe(res->Toasty.success(this, "Feeds loaded").show(), throwable -> Log.d(TAG, "onCreate: suberr "+throwable.getMessage()));
     }
 
     public static void attemptLogin(Context context, EditText userNameView, EditText mPasswordView, RedditStore store) {

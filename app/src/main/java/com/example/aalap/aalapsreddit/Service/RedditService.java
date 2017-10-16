@@ -27,9 +27,6 @@ public interface RedditService {
     @GET("r/{path}/.rss")
     Observable<Response<Feed>> getFeedsO(@Path("path") String text);
 
-    @GET(".rss")
-    Observable<Response<Feed>> getSubReddits();
-
     @GET("{path}.rss")
     Observable<Response<Feed>> getCommentFeeds(@Path("path") String text);
 
@@ -48,17 +45,4 @@ public interface RedditService {
             , @Path("comment") String comment
             , @Query("parent") String parent
             , @Query("amp;text") String commentText);
-
-    @POST("{comment}")
-    Call<ResponseBody> submitComment(
-            @HeaderMap Map<String, String> headers,
-            @Path("comment") String comment,
-            @Query("parent") String parent,
-            @Query("amp;text") String text
-    );
-
-
-    //api/comment?parent=t3_73mwkt&amp;text=aalap"
-
-
 }

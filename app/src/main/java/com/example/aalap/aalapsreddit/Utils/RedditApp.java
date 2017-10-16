@@ -5,6 +5,8 @@ import android.content.Context;
 
 import com.example.aalap.aalapsreddit.Service.RedditService;
 
+import net.danlew.android.joda.JodaTimeAndroid;
+
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
@@ -20,6 +22,7 @@ public class RedditApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        JodaTimeAndroid.init(getApplicationContext());
     }
 
     public static RedditService getRetrofit(){

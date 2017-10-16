@@ -5,13 +5,13 @@ import android.content.Intent;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.example.aalap.aalapsreddit.Activities.CommentsActivity;
 import com.example.aalap.aalapsreddit.Models.Comments;
 import com.example.aalap.aalapsreddit.Models.Entry;
@@ -19,6 +19,8 @@ import com.example.aalap.aalapsreddit.R;
 import com.example.aalap.aalapsreddit.Utils.DialogUtils;
 import com.example.aalap.aalapsreddit.Utils.RedditApp;
 import com.squareup.picasso.Picasso;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import java.util.List;
 
@@ -63,6 +65,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
         if(!isComments){
             Entry entry = (Entry) items.get(position);
+            DateTime dateTime = new DateTime(entry.getUpdated(), DateTimeZone.getDefault());
+            Log.d(TAG, "onBindViewHolder: "+dateTime);
             holder.updatedAt.setText(entry.getUpdated());
             holder.title.setText(entry.getTitle());
             if (entry.getAuthor() != null)

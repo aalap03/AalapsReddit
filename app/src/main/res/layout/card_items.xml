@@ -32,7 +32,7 @@
             android:gravity="center_vertical"
             android:orientation="vertical">
 
-            <TextView
+            <com.example.aalap.aalapsreddit.Utils.MyTextView
                 android:id="@+id/title"
                 android:maxLines="1"
                 android:transitionName="title"
@@ -43,7 +43,7 @@
                 android:layout_marginBottom="5dp"
                 android:text="title" />
 
-            <TextView
+            <com.example.aalap.aalapsreddit.Utils.MyTextView
                 android:id="@+id/author_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
                 android:transitionName="author"
                 android:text="Author Name" />
 
-            <TextView
+            <com.example.aalap.aalapsreddit.Utils.MyTextView
                 android:id="@+id/updated"
                 android:transitionName="updated"
                 android:textColor="@color/colorAccent"
