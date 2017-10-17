@@ -6,8 +6,12 @@
     android:layout_height="match_parent"
     tools:context="com.example.aalap.aalapsreddit.Activities.FeedsActivity">
 
+    <include layout="@layout/sub_reddit_layout_item"
+        android:id="@+id/subreddit_title"/>
+
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
+        android:layout_below="@id/subreddit_title"
         android:id="@+id/recyclerview"
         android:layout_margin="10dp"
         android:layout_height="match_parent">

@@ -31,7 +31,7 @@ public class MyTextView extends android.support.v7.widget.AppCompatTextView {
     }
 
     public void init(Context context){
-        typeface = Typeface.createFromAsset(context.getAssets(), "Knowing How.ttf");
+        typeface = Typeface.createFromAsset(context.getAssets(), "Lato-MediumItalic.ttf");
         setTypeface(typeface);
     }
 }

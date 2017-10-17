@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.aalap.aalapsreddit.Adapter.FeedAdapter;
@@ -33,10 +34,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import es.dmoral.toasty.Toasty;
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static android.view.View.GONE;
 import static com.example.aalap.aalapsreddit.Activities.FeedsActivity.BASE_URL;
 import static com.example.aalap.aalapsreddit.Adapter.FeedAdapter.ID;
 
@@ -48,11 +51,12 @@ public class CommentsActivity extends AppCompatActivity {
     Intent intent;
     RedditStore store;
     List<Comments> comments = new ArrayList<>();
-    Disposable subscribe;
+    Observable<List<Entry>> listObservable;
     ViewGroup parent;
     Preference preference;
     EventBus eventBus = EventBus.getDefault();
     AlertDialog alertDialog;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +68,7 @@ public class CommentsActivity extends AppCompatActivity {
         preference = new Preference(getApplicationContext());
 
         parent = findViewById(R.id.comment_screen_root);
+        progressBar = findViewById(R.id.progress);
         recyclerView = findViewById(R.id.comment_recycler);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setItemPrefetchEnabled(false);
@@ -96,16 +101,22 @@ public class CommentsActivity extends AppCompatActivity {
 
         String link = intent.getStringExtra(FeedAdapter.COMMENT_LINK).replace(BASE_URL, "");
 
-        subscribe = RedditApp.getRetrofit().getCommentFeeds(link)
+
+        listObservable = RedditApp.getRetrofit().getCommentFeeds(link)
                 .map(response -> {
                     if (response.isSuccessful()) {
+                        Log.d(TAG, "inObservable map");
                         return store.getEntryList(response);
                     } else {
-                        Log.d(TAG, "onCreate: res err " + response.errorBody().string());
+                        Log.d(TAG, "inObservable: map err " + response.errorBody().string());
                         throw new RuntimeException("Error while fetching comments, code: " + response.code());
                     }
                 })
+                .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(entries -> {
+                    Log.d(TAG, "inObservable onNext");
+
+                    progressBar.setVisibility(View.VISIBLE);
                     comments = new ArrayList<>();
                     for (Entry entry : entries) {
                         Log.d(TAG, "content: " + entry.getContent());
@@ -122,16 +133,16 @@ public class CommentsActivity extends AppCompatActivity {
                         Log.d(TAG, "commentId: " + entry.getId());
                     }
                 })
-                .doOnError(throwable -> {
-                    throw new RuntimeException(throwable.getMessage());
-                })
-                .observeOn(AndroidSchedulers.mainThread())
+
                 .doOnComplete(() -> {
+                    Log.d(TAG, "inObservable onCOmpleted");
                     FeedAdapter adapter = new FeedAdapter(comments, this, true);
                     recyclerView.setAdapter(adapter);
+                    progressBar.setVisibility(GONE);
                 })
-                .subscribeOn(Schedulers.io())
-                .subscribe();
+                .subscribeOn(Schedulers.io());
+
+        listObservable.subscribe(result->{}, throwable -> Toasty.error(this, throwable.getMessage()).show());
     }
 
     private void openDialog() {
@@ -153,9 +164,6 @@ public class CommentsActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (subscribe != null && !subscribe.isDisposed())
-            subscribe.dispose();
-
         if (eventBus.isRegistered(this))
             eventBus.unregister(this);
     }
@@ -168,8 +176,11 @@ public class CommentsActivity extends AppCompatActivity {
                 alertDialog.dismiss();
             if (eventMsg.getMsg().equalsIgnoreCase("LOGIN"))
                 Toasty.success(this, "Logged in successfully").show();
-            else if (eventMsg.getMsg().equalsIgnoreCase("COMMENT_POSTED"))
+            else if (eventMsg.getMsg().equalsIgnoreCase("COMMENT_POSTED")){
                 Toasty.success(this, "Comment posted successfully").show();
+                listObservable.subscribe(result->{}, throwable -> Toasty.error(this, throwable.getMessage()).show());
+            }
+
             else if (eventMsg.getMsg().equalsIgnoreCase("ERROR_COMMENT"))
                 Toasty.error(this, "Could not post comment: are you signed in?").show();
 

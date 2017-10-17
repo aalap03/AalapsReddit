@@ -80,11 +80,10 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                         .error(R.drawable.reddit_default_background)
                         .placeholder(R.mipmap.ic_launcher_round)
                         .into(holder.imageView);
-            else {
+            else
                 Picasso.with(activity)
                         .load(R.drawable.reddit_default_background)
                         .into(holder.imageView);
-            }
 
             holder.itemView.setOnClickListener(v -> holder.bindClick(entry));
         }

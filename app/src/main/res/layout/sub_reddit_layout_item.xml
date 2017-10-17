@@ -4,17 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
+    android:transitionName="sub_reddit"
     android:layout_gravity="center"
+    android:gravity="center"
     android:orientation="horizontal">
+
     <com.example.aalap.aalapsreddit.Utils.MyTextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/subReddit"
-        android:maxLines="1"
-        android:padding="10dp"
+        android:layout_width="100dp"
+        android:gravity="center"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@drawable/curvy_rectangle"
-        android:textColor="@color/white"
         android:ellipsize="end"
-        android:text="aalap" />
+        android:maxLines="1"
+        android:padding="10dp"
+        android:text="aalap"
+        android:textColor="@color/white" />
 </LinearLayout>
